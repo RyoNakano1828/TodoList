@@ -14,18 +14,26 @@ class TableViewController: UITableViewController {
     
     //チェックマークをBool型の配列で定義
     var todoCheck = [Bool]()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         /*
-        todoText.append("Swiftの勉強をする")
-        todoCheck.append(false)
-        todoText.append("地頭力を鍛える")
-        todoCheck.append(false)
-        */
+         todoText.append("Swiftの勉強をする")
+         todoCheck.append(false)
+         todoText.append("地頭力を鍛える")
+         todoCheck.append(false)
+         */
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.didTapAddItemButton(_:)))
         self.navigationItem.rightBarButtonItem?.tintColor = UIColor.white
+        
+        //保存されているテキストを取得
+        if UserDefaults.standard.object(forKey: "TodoText") != nil {
+            todoText = UserDefaults.standard.object(forKey: "TodoText") as! [String]
+        }
+        if UserDefaults.standard.object(forKey: "TodoCheck") != nil {
+            todoCheck = UserDefaults.standard.object(forKey: "TodoCheck") as! [Bool]
+        }
     }
     
     //セルの数を設定する
@@ -54,6 +62,8 @@ class TableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         todoCheck[indexPath.row] = !todoCheck[indexPath.row]
         tableView.reloadRows(at: [indexPath], with: .automatic)
+        //データを保存
+        UserDefaults.standard.set(todoCheck, forKey: "TodoCheck")
     }
     
     //セルにタスクを追加するアクションシートを実装
@@ -68,7 +78,13 @@ class TableViewController: UITableViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (_) in
             if let title = alert.textFields?[0].text
             {
-                self.addNewToDoItem(title: title)
+                if title == "" {
+                    let al = UIAlertController(title: "エラー", message: "テキストを入力してください", preferredStyle: .alert)
+                    al.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(al, animated: true, completion: nil)
+                }else{
+                    self.addNewToDoItem(title: title)
+                }
             }
         }))
         self.present(alert, animated: true, completion: nil)
@@ -80,6 +96,9 @@ class TableViewController: UITableViewController {
         todoText.append(title)
         todoCheck.append(false)
         tableView.insertRows(at: [IndexPath(row: newIndex, section: 0)], with: .top)
+        //データを保存
+        UserDefaults.standard.set(todoText, forKey: "TodoText")
+        UserDefaults.standard.set(todoCheck, forKey: "TodoCheck")
     }
     
     //セルを消去する
@@ -87,7 +106,10 @@ class TableViewController: UITableViewController {
         todoText.remove(at: indexPath.row)
         todoCheck.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .top)
+        //データを保存
+        UserDefaults.standard.set(todoText, forKey: "TodoText")
+        UserDefaults.standard.set(todoCheck, forKey: "TodoCheck")
     }
-
+    
 }
 
